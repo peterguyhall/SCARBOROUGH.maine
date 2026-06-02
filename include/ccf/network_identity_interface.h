@@ -24,9 +24,19 @@ namespace ccf
   /// Status of the network identity endorsement fetching process.
   enum class FetchStatus : uint8_t
   {
-    Retry, ///< Fetching should be retried
-    Done, ///< Fetching completed successfully
-    Failed ///< Fetching failed
+    Fetching, ///< Subsystem is actively walking the endorsement chain; no
+              ///< chain data is yet available to read.
+    Ready, ///< The full endorsement chain has been fetched and validated;
+           ///< all reads return their definitive answers.
+    PartialReady, ///< A bounded fetch attempt for some predecessor endorsement
+                  ///< chunk exhausted its retry budget without succeeding. The
+                  ///< chain data that was fetched is available for reads.
+                  ///< Background polling is stopped; callers may call
+                  ///< @ref NetworkIdentitySubsystemInterface::trigger_extension
+                  ///< to retry fetching the missing predecessor.
+    Failed ///< Endorsement-chain validation failed irrecoverably (e.g.
+           ///< signature mismatch or chain-integrity violation). The
+           ///< subsystem treats this as fatal and the node will abort.
   };
 
   /// Map from sequence number to EC public key, representing the trusted
@@ -65,12 +75,27 @@ namespace ccf
     /// Returns the current status of endorsement fetching.
     [[nodiscard]] virtual FetchStatus endorsements_fetching_status() const = 0;
 
-    /// Returns the COSE endorsements chain for the given sequence number,
-    /// or std::nullopt if the chain is not available for the given sequence
-    /// number.
+    /// If the subsystem is currently in @ref FetchStatus::PartialReady,
+    /// schedule a fresh attempt to fetch the next missing predecessor
+    /// endorsement and transition to @ref FetchStatus::Fetching. No-op in
+    /// any other state. Thread-safe and idempotent: concurrent callers
+    /// trigger at most one extension cycle.
+    virtual void trigger_extension() = 0;
+
+    /// Returns the COSE endorsements chain for the given sequence number.
     ///
-    /// @throws IdentityHistoryNotFetched if identity history fetching has not
-    /// completed.
+    /// @returns A vector of raw COSE endorsements, oldest-first, leading to
+    /// the current service identity. May be empty for the current epoch or
+    /// when the chain has been fully walked and the given seqno is
+    /// pre-history. Returns std::nullopt if no chain is available because
+    /// the subsystem is still fetching (@ref FetchStatus::Fetching) or
+    /// because it is partial and the chain it has does not cover the
+    /// requested seqno (@ref FetchStatus::PartialReady). In the latter
+    /// case, callers may invoke @ref trigger_extension to ask the
+    /// subsystem to attempt to extend the chain.
+    ///
+    /// @throws IdentityHistoryNotFetched if fetching status is
+    /// @ref FetchStatus::Fetching.
     [[nodiscard]] virtual std::optional<CoseEndorsementsChain>
     get_cose_endorsements_chain(ccf::SeqNo seqno) const = 0;
 
@@ -78,8 +103,12 @@ namespace ccf
     /// sequence number, or nullptr if the sequence number precedes the
     /// earliest known trusted key.
     ///
-    /// @throws IdentityHistoryNotFetched if identity history fetching has not
-    /// completed.
+    /// @note In @ref FetchStatus::PartialReady the earliest known trusted
+    /// key may correspond to a more-recent epoch than expected. Callers
+    /// that need older keys can invoke @ref trigger_extension and retry.
+    ///
+    /// @throws IdentityHistoryNotFetched if fetching status is
+    /// @ref FetchStatus::Fetching.
     /// @throws std::logic_error if no trusted keys have been fetched, or if
     /// internal key resolution is inconsistent.
     [[nodiscard]] virtual ccf::crypto::ECPublicKeyPtr get_trusted_identity_for(
@@ -88,8 +117,14 @@ namespace ccf
     /// Returns all trusted network identity keys as a map from sequence
     /// number to EC public key.
     ///
-    /// @throws IdentityHistoryNotFetched if identity history fetching has not
-    /// completed.
+    /// @note In @ref FetchStatus::PartialReady the returned map only
+    /// contains the keys whose endorsements were successfully validated;
+    /// older epochs are silently omitted until a successful extension.
+    /// Callers can invoke @ref trigger_extension to ask the subsystem to
+    /// attempt to fetch them.
+    ///
+    /// @throws IdentityHistoryNotFetched if fetching status is
+    /// @ref FetchStatus::Fetching.
     [[nodiscard]] virtual TrustedKeys get_trusted_keys() const = 0;
   };
 }

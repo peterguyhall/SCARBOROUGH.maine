@@ -222,7 +222,7 @@ namespace ccf
 
       const auto fetching =
         network_identity_subsystem->endorsements_fetching_status();
-      if (fetching == FetchStatus::Retry)
+      if (fetching == FetchStatus::Fetching)
       {
         return false;
       }
@@ -233,7 +233,8 @@ namespace ccf
           "cannot be fetched",
           state->transaction_id.seqno));
       }
-      if (fetching != FetchStatus::Done)
+      if (
+        fetching != FetchStatus::Ready && fetching != FetchStatus::PartialReady)
       {
         throw std::logic_error("Unexpected endorsements fetching status");
       }
@@ -241,6 +242,19 @@ namespace ccf
       auto cose_endorsements =
         network_identity_subsystem->get_cose_endorsements_chain(
           state->transaction_id.seqno);
+      if (!cose_endorsements.has_value())
+      {
+        // The requested seqno falls below the earliest validated
+        // endorsement in the subsystem's partial chain (one or more
+        // predecessor ledger chunks are missing). Ask the subsystem to
+        // re-attempt the fetch (no-op if not in PartialReady or if a
+        // cycle is already running) and signal the caller to retry.
+        if (fetching == FetchStatus::PartialReady)
+        {
+          network_identity_subsystem->trigger_extension();
+        }
+        return false;
+      }
       state->receipt->cose_endorsements = cose_endorsements;
       return true;
     }

@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 [7.0.5]: https://github.com/microsoft/CCF/releases/tag/ccf-7.0.5
 
+### Added
+
+- `ccf::NetworkIdentitySubsystemInterface` now exposes a `PartialReady` fetch status and a `trigger_extension()` method. After 30 consecutive failed attempts at 100 ms intervals to fetch a missing previous-identity endorsement ledger chunk, the subsystem transitions out of bootstrap into `PartialReady`, serves receipts for the chain segments it has validated, and stops polling. Callers can invoke `trigger_extension()` to re-attempt fetching the missing chunk; the call is thread-safe, idempotent, and does not change the visible status (readers continue to access the existing partial chain throughout the extension cycle) (#TBD).
+
+### Changed
+
+- Permanently-missing ledger chunks containing previous-identity endorsements no longer block node startup indefinitely. The network identity subsystem now serves receipts for the most-recent epochs it has validated and returns HTTP 202 for older receipts whose endorsement chain crosses the gap. The historical-queries adapter calls `trigger_extension()` whenever it observes a 202 caused by a partial chain, so missing chunks that reappear are picked up automatically on the next client retry. Genuine chain-integrity or signature errors continue to fail-hard (#TBD). Note: while the chain is healing, `verify_code_transparent_statement` (used during node-join attestation verification) may transiently report `FailedInvalidHostData` for joiners presenting a transparent-statement receipt whose seqno is below the receiver's partial chain. This self-corrects once the missing predecessor endorsement is fetched; joiners can retry (#TBD).
+- `ccf::FetchStatus` enumerators renamed: `Retry` → `Fetching`, `Done` → `Ready`. A new `PartialReady` enumerator is added. Callers that pattern-match against these names must be updated; the semantics of the two pre-existing states are unchanged (#TBD).
+
 ### Deprecated
 
 - Accessing ledger-signature names (table names, exception classes) via `ccf.ledger` now emits a `DeprecationWarning`; import them from `ccf.signatures` instead (#7904).
