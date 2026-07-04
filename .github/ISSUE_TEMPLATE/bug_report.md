@@ -1,9 +1,11 @@
 ---
 name: Bug report
 about: Report a bug in CCF
-title: ""
+title: ''
+labels: ''
+assignees: ''
 type: bug
-assignees: ""
+
 ---
 
 **Describe the bug**
