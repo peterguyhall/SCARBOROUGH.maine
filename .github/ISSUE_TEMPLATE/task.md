@@ -1,9 +1,11 @@
 ---
 name: Project task
 about: Create a task/TODO
-title: ""
+title: ''
+labels: ''
+assignees: ''
 type: task
-assignees: ""
+
 ---
 
 **NOTE**: This type of issue is reserved for the project team. If you are not a member of the team, please use either the bug or feature templates.
