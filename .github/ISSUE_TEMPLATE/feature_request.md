@@ -1,9 +1,11 @@
 ---
 name: Feature request
 about: Request that a feature is implemented in CCF
-title: ""
+title: ''
+labels: ''
+assignees: ''
 type: feature
-assignees: ""
+
 ---
 
 **Is your feature request related to a problem? Please describe.**
