@@ -15,4 +15,4 @@ warnings = "deny"
 [dependencies]
 openssl-sys = "0.9"
 cborrs = { git = "https://github.com/project-everest/everparse.git", rev = "5681d783c8c2e31b4988f749ffe07b520f4963c0" } # v2026.02.25
-cborrs-nondet = { git = "https://github.com/project-everest/everparse.git", rev = "f4cd5ffa183edd5cc824d66588012bcf8d0bdccd" } # v2026.02.25
+cborrs-nondet = { git = "https://github.com/project-everest/everparse.git", rev = "5681d783c8c2e31b4988f749ffe07b520f4963c0" } # v2026.02.25
