@@ -83,7 +83,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     name: Ubuntu - ${{ matrix.os }} ${{ matrix.build-type }} ${{ matrix.variant }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Install build dependencies
       run: "sudo apt install ninja-build"
     - name: Configure CMake
@@ -119,7 +119,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     name: Bazel - ${{ matrix.os }} ${{ matrix.build-type }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - uses: bazelbuild/setup-bazelisk@v3
     - name: Mount bazel cache  # Optional
       uses: actions/cache@v4
@@ -142,7 +142,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     name: Mac OS ${{ matrix.os }} ${{ matrix.build-type }} ${{ matrix.extra-cmake-flags }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Install build dependencies
             # The homebrew packages are broken at the moment and error out
             # after trying to install Python as a dependency of ninja because
@@ -193,7 +193,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: FreeBSD-${{ matrix.os.version}} ${{ matrix.build-type }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - uses: vmactions/freebsd-vm@v1
       with:
         release: ${{ matrix.os.version}}
@@ -224,7 +224,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: NetBSD-${{ matrix.os.version}} ${{ matrix.build-type }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - uses: vmactions/netbsd-vm@v1
       with:
         release: ${{ matrix.os.version}}
@@ -293,7 +293,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     name: Sanitizer - ${{ matrix.os }} ${{ matrix.build-type }} ${{ matrix.variant }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Install build dependencies
       run: ${{ matrix.dependencies }}
     - name: Configure CMake
@@ -346,7 +346,7 @@ jobs:
     runs-on: ${{matrix.arch.host-os}}
     name: Crossbuild - ${{matrix.build-type}} cross-build for ${{ matrix.arch.triple }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: "Install cross-compile toolchain and QEMU (ubuntu-24.04)"
       if: matrix.arch.host-os == 'ubuntu-24.04'
       run: |
@@ -456,7 +456,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     name: Windows - ${{ matrix.os }} ${{ matrix.arch }} ${{ matrix.build-type }} ${{ matrix.toolchain }} ${{ matrix.variant }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Configure CMake
       run: |
         cmake -B ${{github.workspace}}/build -A ${{ matrix.arch }} ${{ matrix.toolchain }} ${{ matrix.extra-cmake-flags }} -DSNMALLOC_CI_BUILD=On -DSNMALLOC_RUST_SUPPORT=On
@@ -476,7 +476,7 @@ jobs:
     name: Format check
     # We don't need to do the build for this job, but we need to configure it to get the clang-format target
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Install clang-tidy and clang-format
       run: |
         sudo apt update
@@ -502,7 +502,7 @@ jobs:
     name: Fuzzing
     runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -DSNMALLOC_ENABLE_FUZZING=ON -DFUZZTEST_FUZZING_MODE=ON -DCMAKE_CXX_COMPILER=clang++
     - name: Build
@@ -530,7 +530,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     name: Self Vendored STL - ${{ matrix.os }} ${{ matrix.cxx }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Prepare Windows
       if: runner.os == 'Windows'
       run: |
@@ -568,7 +568,7 @@ jobs:
         profile: [RelWithDebInfo, Debug]
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Install Ninja
       run: |
         sudo apt-get install -y ninja-build
