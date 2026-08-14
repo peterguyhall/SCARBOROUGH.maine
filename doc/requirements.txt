@@ -14,4 +14,4 @@ furo
 docutils==0.18.*
 # Required-by: sphinxcontrib-openapi
 # cannot import name 'error_string' from 'docutils.io'
-sphinx-mdinclude==0.5.4
+sphinx-mdinclude==0.6.2
