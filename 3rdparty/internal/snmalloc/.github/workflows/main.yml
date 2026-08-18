@@ -190,7 +190,7 @@ jobs:
       fail-fast: false
     # Kill these jobs if they take too long.
     timeout-minutes: 25
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: FreeBSD-${{ matrix.os.version}} ${{ matrix.build-type }}
     steps:
     - uses: actions/checkout@v7
@@ -221,7 +221,7 @@ jobs:
       fail-fast: false
     # Kill these jobs if they take too long.
     timeout-minutes: 25
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: NetBSD-${{ matrix.os.version}} ${{ matrix.build-type }}
     steps:
     - uses: actions/checkout@v7
@@ -472,7 +472,7 @@ jobs:
 
   # Job to run clang-format and report errors
   format:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Format check
     # We don't need to do the build for this job, but we need to configure it to get the clang-format target
     steps:
