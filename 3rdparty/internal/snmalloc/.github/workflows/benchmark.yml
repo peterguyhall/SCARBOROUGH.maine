@@ -32,7 +32,7 @@ jobs:
 
       # Setup docker buildx
       - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v4
 
       - name: Build and run benchmarks in Docker
         id: docker_build
