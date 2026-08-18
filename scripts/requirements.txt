@@ -1,2 +1,2 @@
-cryptography >= 44, < 47
+cryptography >=50, <51
 httpx >= 0.28.1, < 0.29
